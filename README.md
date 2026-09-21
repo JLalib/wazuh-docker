@@ -6,21 +6,23 @@
 
 ## 📋 Descripción general
 
-**Wazuh en Docker** es una solución de seguridad completamente autohospedada y open source que proporciona **SIEM (Security Information and Event Management) + XDR (Extended Detection and Response)** integrado. Incluye agentes multi-plataforma (Linux, Windows, macOS), análisis de logs centralizado, file integrity monitoring (FIM), intrusion detection (IDS), detección de anomalías, malware y rootkits, escaneo de vulnerabilidades, monitorización de cumplimiento normativo (HIPAA, PCI-DSS, GDPR, NIST), dashboards Kibana intuitivos, API REST completa, integraciones webhook, respuesta activa automatizada, reglas de detección personalizadas, workflows de respuesta a incidentes, escalable a miles de endpoints, 100% privado sin vendor lock-in.
+**Wazuh** es una solución de seguridad completamente autohospedada y open source que proporciona **SIEM (Security Information and Event Management) + XDR (Extended Detection and Response)** integrado. Incluye agentes multi-plataforma (Linux, Windows, macOS), análisis de logs centralizado, file integrity monitoring (FIM), intrusion detection (IDS), detección de anomalías, malware y rootkits, escaneo de vulnerabilidades, monitorización de cumplimiento (HIPAA, PCI-DSS, GDPR, NIST), integración de threat intelligence, dashboards Kibana intuitivos, API REST completa, webhooks para automatización, active response, reglas de detección personalizadas, workflows de respuesta a incidentes, escalable a miles de endpoints, 100% privado sin vendor lock-in.
+
+Este repositorio proporciona una implementación **production-ready** con Docker Compose que despliega el stack completo: Wazuh Manager, Wazuh Indexer (OpenSearch fork) y Wazuh Dashboard (Kibana-based).
 
 ## ✨ Características principales
 
 - **Log analysis centralizado**: Recopila logs de múltiples fuentes, correlación basada en reglas, alerting en tiempo real
 - **File Integrity Monitoring (FIM)**: Detecta cambios en archivos críticos, monitorea permisos, alertas automáticas
 - **Intrusion Detection (IDS)**: Detección de intrusiones, network anomaly detection, threat signatures
-- **Malware detection**: Detección por comportamiento de malware, rootkit detection, identificación de PUP
-- **Vulnerability scanning**: CVE scanning automático, inventario de paquetes, tracking de remediación
+- **Malware detection**: Detección por comportamiento de malware, rootkit detection, PUP identification
+- **Vulnerability scanning**: CVE scanning automático, package inventory, remediation tracking
 - **Compliance reporting**: HIPAA, PCI-DSS, GDPR, NIST 800-53, TSC, CIS compliance reporting
-- **Kibana dashboards**: Visualización intuitiva, dashboards personalizados, métricas en tiempo real
-- **REST API**: API completa, documentación OpenAPI, integraciones personalizadas, acceso programático
+- **Kibana dashboards**: Visualización intuitiva, custom dashboards, métricas en tiempo real
+- **REST API**: API completa con documentación OpenAPI, integraciones personalizadas, acceso programático
 - **Webhook integrations**: Slack, Teams, email alerting, webhooks personalizados, automatización event-driven
-- **Active response**: Respuesta a incidentes automatizada, ejecución de scripts, automatización de reglas de firewall
-- **Threat intelligence**: Integración VirusTotal, threat feeds, IOC ingestion y alerting
+- **Active response**: Respuesta automatizada a incidentes, ejecución de scripts, automatización de reglas de firewall
+- **Threat intelligence**: VirusTotal integration, threat feeds, IOC ingestion y alerting
 - **Multi-platform agents**: Linux, Windows, macOS, Amazon Linux, CentOS, Debian, Ubuntu, etc.
 
 ## 📋 Requisitos del sistema
@@ -43,6 +45,7 @@
 
 ```yaml
 version: '3.8'
+
 services:
   wazuh:
     image: wazuh/wazuh:latest
@@ -103,37 +106,32 @@ docker compose logs -f wazuh
 
 ### Paso 3: Acceder a Wazuh
 
-| Servicio | URL |
-|----------|-----|
-| 🛡️ **Wazuh Web UI** | `https://localhost:443` |
-| 📊 **Kibana Dashboard** | `https://localhost:5601` |
-| 📡 **API REST** | `https://localhost:443/api/v1` |
-
-**Credenciales por defecto**: `admin` / `SecureSecurePass123!` **(¡cambiar inmediatamente!)**
+```bash
+# UI Web: https://localhost:443
+# Kibana Dashboard: https://localhost:5601
+# API REST: https://localhost:443/api/v1
+# Default credentials: admin/SecurePass123! (cambiar!)
+```
 
 ## ⚙️ Configuración
 
-1. **Cambiar contraseña por defecto**: Primer login → cambiar password de admin
-2. **Configurar HTTPS**: Certificado autofirmado por defecto; usar reverse proxy (nginx/Caddy) para certificado válido
-3. **Ajustar recursos Elasticsearch**: Modificar `OPENSEARCH_JAVA_OPTS` según RAM disponible (`-Xms2g -Xmx2g` para 4GB+)
-4. **Configurar puertos**: Cambiar mapeo de puertos si hay conflictos (ej: `- "8443:443"`)
-5. **Persistencia de datos**: Volúmenes Docker nombrados (`wazuh_etc`, `wazuh_var`, `wazuh_indexer_data`)
-6. **Agent enrollment**: Configurar `WAZUH_MANAGER` IP en agentes para registro automático
-7. **Webhook integrations**: Management → Configuration → Integrations → Slack/Teams/Custom webhook
-8. **Alert threshold tuning**: Management → Groups → Rules → Set alert level threshold (1-15)
+1. **Cambiar contraseña por defecto**: Primer login, cambia admin password inmediatamente
+2. **HTTPS con certificado autofirmado**: El certificado es autofirmado; acepta la advertencia del navegador o configura reverse proxy con certificado válido
+3. **Configurar INDEXER_PASSWORD**: Usa una contraseña segura en producción (mínimo 12 caracteres, mayúsculas, números, símbolos)
+4. **Ajustar OPENSEARCH_JAVA_OPTS**: Modifica `-Xms1g -Xmx1g` según RAM disponible (máx 50% RAM del host)
+5. **Configurar puertos**: Cambia puertos expuestos si hay conflictos (ej: 8443:443)
+6. **Persistencia de datos**: Los volúmenes Docker garantizan persistencia entre reinicios
+7. **Agent deployment**: Windows (MSI installer), Linux (RPM/DEB packages), macOS (DMG installer). Deploy vía Ansible/Puppet para escala
 
 ## 🚀 Primeros pasos
 
-1. Abre `https://localhost:443` en tu navegador
-2. Login con `admin` / `SecureSecurePass123!` **(cambiar credencial inmediatamente)**
-3. El dashboard principal carga con overview de seguridad
-4. Agrega agents en **"Add agent"** para monitorear endpoints
-5. Agents instalados en Linux/Windows comienzan a reportar logs automáticamente
+1. Abre `https://localhost:443` en navegador
+2. Login con `admin` / `SecurePass123!` (¡cambiar credencial!)
+3. Dashboard principal carga con overview de seguridad
+4. Agrega agents en "Add agent" para monitorear endpoints
+5. Agents instalados en Linux/Windows comienzan a reportar logs
 6. Kibana dashboard muestra análisis de logs en tiempo real
-7. Configura rules, alerts, webhooks según necesidad
-
-> ⚠️ **Cambiar contraseña por defecto**: Primero login, cambia admin password. HTTPS con certificado autofirmado.
-> 💡 **Agent deployment**: Windows: MSI installer. Linux: RPM/DEB packages. macOS: DMG installer. Deploy vía Ansible/Puppet para escala.
+7. Configure rules, alerts, webhooks según necesidad
 
 ## 💡 Casos de uso
 
@@ -149,11 +147,11 @@ docker compose logs -f wazuh
 
 Para exponer Wazuh de forma segura a Internet:
 
-1. **Reverse Proxy** (nginx/Caddy) con certificado TLS válido (Let's Encrypt)
-2. **Autenticación**: Configurar LDAP, Active Directory, SAML o API keys
-3. **Firewall**: Restringir puertos 1514/1515/514 solo a IPs de agentes conocidos
-4. **VPN/Tailscale**: Acceso solo vía VPN para administración
-5. **Rate limiting**: Configurar en reverse proxy para API endpoints
+1. **Reverse Proxy (nginx/Caddy)** con certificado TLS válido (Let's Encrypt)
+2. **Autenticación**: Configura LDAP, Active Directory, SAML o API keys
+3. **Firewall**: Restringe puertos 1514/1515/514 solo a IPs de agents conocidos
+4. **VPN/Tailscale**: Acceso solo vía VPN para mayor seguridad
+5. **Rate limiting**: Configura rate limiting en reverse proxy para API
 
 ## 🛠️ Gestión y mantenimiento
 
@@ -188,7 +186,7 @@ docker compose up -d
 # Snapshot Elasticsearch
 docker compose exec wazuh.indexer curl -XGET "https://localhost:9200/_snapshot" -u admin:SecurePass123!
 
-# O backup simple de volúmenes
+# O simplemente backup volúmenes
 docker compose down
 tar -czf wazuh_backup.tar.gz wazuh_* 2>/dev/null || true
 ```
@@ -196,6 +194,7 @@ tar -czf wazuh_backup.tar.gz wazuh_* 2>/dev/null || true
 ### Monitorear consumo
 ```bash
 docker stats wazuh wazuh.indexer wazuh.dashboard
+
 # Típicamente:
 # Wazuh CPU: 5-20% (según volumen logs)
 # Wazuh RAM: 500MB-2GB
@@ -204,14 +203,10 @@ docker stats wazuh wazuh.indexer wazuh.dashboard
 
 ## 📝 Licencia
 
-**AGPL-3.0** - Open source (community edition)
-
-- Código fuente: [Wazuh GitHub Repository](https://github.com/wazuh/wazuh)
-- Imágenes Docker: [Docker Hub - Wazuh official images](https://hub.docker.com/r/wazuh/wazuh)
-- Documentación oficial: [Official Documentation](https://documentation.wazuh.com/)
+**AGPL-3.0** - Community Edition open source. Ver [LICENSE](LICENSE) para detalles.
 
 ---
 
-> 📖 **Basado en el tutorial**: [Cómo instalar Wazuh en Docker - Security Monitoring SIEM autohospedado](https://genbyte.blogspot.com/2026/09/como-instalar-wazuh-en-docker-security.html)  
-> 🎥 **Vídeo tutorial**: [Canal GENBYTE en YouTube](https://www.youtube.com/@genbyte)  
-> ☕ **Apoya el proyecto**: [Ko-fi](https://ko-fi.com/genbyte) | [Newsletter](https://genbyte.blogspot.com/newsletter)
+> 📖 **Artículo original**: [Cómo instalar Wazuh en Docker - Security Monitoring SIEM autohospedado](https://genbyte.blogspot.com/2026/09/como-instalar-wazuh-en-docker-security.html)
+> 🎥 **Vídeo tutorial**: [Canal GENBYTE en YouTube](https://www.youtube.com/@genbyte)
+> ☕ **Apoya el proyecto**: [Ko-fi](https://ko-fi.com/genbyte)
