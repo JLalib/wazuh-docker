@@ -6,22 +6,20 @@
 
 ## 📋 Descripción general
 
-**Wazuh** es una solución de seguridad completamente autohospedada y open source que proporciona **SIEM (Security Information and Event Management) + XDR (Extended Detection and Response)** integrado. Incluye agentes multi-plataforma (Linux, Windows, macOS), análisis de logs centralizado, file integrity monitoring (FIM), intrusion detection (IDS), detección de anomalías, malware y rootkits, escaneo de vulnerabilidades, monitorización de cumplimiento (HIPAA, PCI-DSS, GDPR, NIST), integración de threat intelligence, dashboards Kibana intuitivos, API REST completa, webhooks para automatización, active response, reglas de detección personalizadas, workflows de respuesta a incidentes, escalable a miles de endpoints, 100% privado sin vendor lock-in.
-
-Este repositorio proporciona una implementación **production-ready** con Docker Compose que despliega el stack completo: Wazuh Manager, Wazuh Indexer (OpenSearch fork) y Wazuh Dashboard (Kibana-based).
+**Wazuh en Docker** es una solución de seguridad completamente autohospedada y open source que proporciona **SIEM (Security Information and Event Management) + XDR (Extended Detection and Response)** integrado. Incluye agentes multi-plataforma (Linux, Windows, macOS), análisis de logs centralizado, file integrity monitoring (FIM), intrusion detection (IDS), detección de malware y rootkits, escaneo de vulnerabilidades, compliance reporting (HIPAA, PCI-DSS, GDPR, NIST), dashboards Kibana intuitivos, API REST completa, webhook integrations, active response automation y reglas de detección personalizadas. Escalable a miles de endpoints, 100% privado sin vendor lock-in, enterprise-grade security.
 
 ## ✨ Características principales
 
-- **Log analysis centralizado**: Recopila logs de múltiples fuentes, correlación basada en reglas, alerting en tiempo real
+- **Log analysis centralizado**: Recopila logs de múltiples fuentes, rule-based correlation, real-time alerting
 - **File Integrity Monitoring (FIM)**: Detecta cambios en archivos críticos, monitorea permisos, alertas automáticas
 - **Intrusion Detection (IDS)**: Detección de intrusiones, network anomaly detection, threat signatures
-- **Malware detection**: Detección por comportamiento de malware, rootkit detection, PUP identification
+- **Malware detection**: Detección comportamiento malware, rootkit detection, PUP identification
 - **Vulnerability scanning**: CVE scanning automático, package inventory, remediation tracking
 - **Compliance reporting**: HIPAA, PCI-DSS, GDPR, NIST 800-53, TSC, CIS compliance reporting
-- **Kibana dashboards**: Visualización intuitiva, custom dashboards, métricas en tiempo real
-- **REST API**: API completa con documentación OpenAPI, integraciones personalizadas, acceso programático
-- **Webhook integrations**: Slack, Teams, email alerting, webhooks personalizados, automatización event-driven
-- **Active response**: Respuesta automatizada a incidentes, ejecución de scripts, automatización de reglas de firewall
+- **Kibana dashboards**: Visualización intuitiva, custom dashboards, real-time metrics
+- **REST API**: API completa, OpenAPI docs, custom integrations, programmatic access
+- **Webhook integrations**: Slack, Teams, email alerting, custom webhooks, event-driven automation
+- **Active response**: Automated incident response, script execution, firewall rules automation
 - **Threat intelligence**: VirusTotal integration, threat feeds, IOC ingestion y alerting
 - **Multi-platform agents**: Linux, Windows, macOS, Amazon Linux, CentOS, Debian, Ubuntu, etc.
 
@@ -29,11 +27,11 @@ Este repositorio proporciona una implementación **production-ready** con Docker
 
 - **Docker & Docker Compose v2+**
 - **RAM**: 2 GB - 8 GB mínimo (recomendado 4GB+ para producción)
-- **Espacio en disco**: 20 GB - 200GB+ (según volumen de logs)
+- **Espacio disco**: 20 GB - 200GB+ (según volumen logs)
 - **Puertos TCP**: 443 (UI/API), 1514-1515 (agents), 514 (syslog)
 - **Elasticsearch storage**: SQLite o Elasticsearch remoto
 - **CPU**: 2 cores mínimo (4+ recomendado para producción)
-- **Red**: Acceso outbound para threat intelligence feeds
+- **Red**: acceso outbound para threat intelligence feeds
 - **Opcional**: Reverse proxy nginx/Caddy para HTTPS
 
 > ⚠️ **Resource-intensive**: Wazuh consume más recursos que alternativas ligeras. Mínimo 2-4 GB RAM. Monitorea consumo.
@@ -116,22 +114,26 @@ docker compose logs -f wazuh
 ## ⚙️ Configuración
 
 1. **Cambiar contraseña por defecto**: Primer login, cambia admin password inmediatamente
-2. **HTTPS con certificado autofirmado**: El certificado es autofirmado; acepta la advertencia del navegador o configura reverse proxy con certificado válido
-3. **Configurar INDEXER_PASSWORD**: Usa una contraseña segura en producción (mínimo 12 caracteres, mayúsculas, números, símbolos)
-4. **Ajustar OPENSEARCH_JAVA_OPTS**: Modifica `-Xms1g -Xmx1g` según RAM disponible (máx 50% RAM del host)
-5. **Configurar puertos**: Cambia puertos expuestos si hay conflictos (ej: 8443:443)
-6. **Persistencia de datos**: Los volúmenes Docker garantizan persistencia entre reinicios
-7. **Agent deployment**: Windows (MSI installer), Linux (RPM/DEB packages), macOS (DMG installer). Deploy vía Ansible/Puppet para escala
+2. **HTTPS con certificado autofirmado**: Wazuh usa certificado autofirmado por defecto
+3. **Configurar INDEXER_PASSWORD**: Usa contraseña segura en producción (mínimo 12 chars)
+4. **Ajustar OPENSEARCH_JAVA_OPTS**: Según RAM disponible (ej: -Xms2g -Xmx2g para 4GB)
+5. **Configurar reverse proxy**: nginx/Caddy para HTTPS válido en producción
+6. **Definir grupos de agentes**: Organiza agents por OS, función, criticidad
+7. **Habilitar threat intelligence**: Configura API keys para VirusTotal, threat feeds
+8. **Tuning de reglas**: Ajusta alert level threshold (1-15) para reducir false positives
 
 ## 🚀 Primeros pasos
 
-1. Abre `https://localhost:443` en navegador
-2. Login con `admin` / `SecurePass123!` (¡cambiar credencial!)
+1. Abre **https://localhost:443** en navegador
+2. Login con **admin/SecurePass123!** (¡cambiar credencial!)
 3. Dashboard principal carga con overview de seguridad
-4. Agrega agents en "Add agent" para monitorear endpoints
+4. Agrega agents en **"Add agent"** para monitorear endpoints
 5. Agents instalados en Linux/Windows comienzan a reportar logs
 6. Kibana dashboard muestra análisis de logs en tiempo real
 7. Configure rules, alerts, webhooks según necesidad
+
+> ⚠️ **Cambiar contraseña por defecto**: Primero login, cambia admin password. HTTPS con certificado autofirmado.
+> 💡 **Agent deployment**: Windows: MSI installer. Linux: RPM/DEB packages. macOS: DMG installer. Deploy vía Ansible/Puppet para escala.
 
 ## 💡 Casos de uso
 
@@ -145,13 +147,11 @@ docker compose logs -f wazuh
 
 ## 🔒 Acceso remoto seguro
 
-Para exponer Wazuh de forma segura a Internet:
-
-1. **Reverse Proxy (nginx/Caddy)** con certificado TLS válido (Let's Encrypt)
-2. **Autenticación**: Configura LDAP, Active Directory, SAML o API keys
-3. **Firewall**: Restringe puertos 1514/1515/514 solo a IPs de agents conocidos
-4. **VPN/Tailscale**: Acceso solo vía VPN para mayor seguridad
-5. **Rate limiting**: Configura rate limiting en reverse proxy para API
+- **Reverse proxy recomendado**: nginx o Caddy con certificados Let's Encrypt
+- **Autenticación**: LDAP, Active Directory, SAML, API key support
+- **Firewall**: Restringe puertos 443, 5601, 1514-1515 a IPs de confianza
+- **VPN/Tailscale**: Acceso solo vía VPN para máxima seguridad
+- **Fail2ban**: Protege contra brute force en puerto 443
 
 ## 🛠️ Gestión y mantenimiento
 
@@ -162,7 +162,7 @@ docker compose ps
 
 ### Ver logs
 ```bash
-# Logs del manager
+# Logs principales Wazuh
 docker compose logs -f wazuh
 
 # Logs de Elasticsearch/Indexer
@@ -194,7 +194,6 @@ tar -czf wazuh_backup.tar.gz wazuh_* 2>/dev/null || true
 ### Monitorear consumo
 ```bash
 docker stats wazuh wazuh.indexer wazuh.dashboard
-
 # Típicamente:
 # Wazuh CPU: 5-20% (según volumen logs)
 # Wazuh RAM: 500MB-2GB
@@ -203,10 +202,9 @@ docker stats wazuh wazuh.indexer wazuh.dashboard
 
 ## 📝 Licencia
 
-**AGPL-3.0** - Community Edition open source. Ver [LICENSE](LICENSE) para detalles.
+**AGPL-3.0** - Open source community edition. Ver [LICENSE](LICENSE) para detalles.
 
 ---
 
-> 📖 **Artículo original**: [Cómo instalar Wazuh en Docker - Security Monitoring SIEM autohospedado](https://genbyte.blogspot.com/2026/09/como-instalar-wazuh-en-docker-security.html)
-> 🎥 **Vídeo tutorial**: [Canal GENBYTE en YouTube](https://www.youtube.com/@genbyte)
-> ☕ **Apoya el proyecto**: [Ko-fi](https://ko-fi.com/genbyte)
+> 📖 **Guía completa**: [Cómo instalar Wazuh en Docker - Security Monitoring SIEM autohospedado](https://genbyte.blogspot.com/2026/09/como-instalar-wazuh-en-docker-security.html)
+> 🎥 **Vídeo tutorial**: [Canal GENBYTE YouTube](https://youtube.com/@genbyte)
